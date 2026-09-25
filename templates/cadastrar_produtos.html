@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastrar Produtos — Formulário Produtos</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span>📦</span> Formulário Produtos
+    </a>
+    <ul class="nav-links">
+      <li><a href="/">Início</a></li>
+      <li><a href="/cadastrar">Pessoas</a></li>
+      <li><a href="/cadastrar_produtos" class="active">Produtos</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <div class="produtos-layout">
+      <!-- Formulário -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🛒 Novo Produto</h2>
+        </div>
+
+        <form id="formProduto">
+          <div class="form-grid">
+            <!-- Nome -->
+            <div class="form-group full">
+              <label for="nome">Nome do Produto <span class="required">*</span></label>
+              <input type="text" id="nome" name="nome" class="form-control" placeholder="Ex: Notebook Gamer RGB" required>
+            </div>
+
+            <!-- Descrição -->
+            <div class="form-group full">
+              <label for="descricao">Descrição</label>
+              <textarea id="descricao" name="descricao" class="form-control" placeholder="Descreva o produto, características, benefícios..."></textarea>
+            </div>
+
+            <!-- Preço -->
+            <div class="form-group">
+              <label for="preco">Preço (R$)</label>
+              <input type="number" id="preco" name="preco" class="form-control" min="0" step="0.01" placeholder="0,00" value="0">
+            </div>
+
+            <!-- Quantidade com controles +/- -->
+            <div class="form-group">
+              <label>Quantidade</label>
+              <div class="qty-control">
+                <button type="button" id="qtyMinus" aria-label="Diminuir">−</button>
+                <input type="number" id="quantidade" name="quantidade" min="0" value="1" step="1">
+                <button type="button" id="qtyPlus" aria-label="Aumentar">+</button>
+              </div>
+            </div>
+
+            <!-- Validade -->
+            <div class="form-group">
+              <label for="validade">Validade</label>
+              <input type="date" id="validade" name="validade" class="form-control">
+            </div>
+
+            <!-- Categoria -->
+            <div class="form-group">
+              <label for="categoria">Categoria</label>
+              <select id="categoria" name="categoria" class="form-control">
+                <option value="">Selecione...</option>
+                <option value="eletronicos">Eletrônicos</option>
+                <option value="alimentos">Alimentos</option>
+                <option value="roupas">Roupas</option>
+                <option value="casa">Casa &amp; Decoração</option>
+                <option value="esportes">Esportes</option>
+                <option value="outros">Outros</option>
+              </select>
+            </div>
+
+            <!-- Tags -->
+            <div class="form-group full">
+              <label>Tags</label>
+              <div class="tags-container" id="tagsContainer">
+                <input type="text" id="tagInput" placeholder="Digite e pressione Enter...">
+              </div>
+              <input type="hidden" id="tags" name="tags">
+            </div>
+
+            <!-- Imagem -->
+            <div class="form-group full">
+              <label>Imagem do Produto</label>
+              <div class="image-upload" id="imageUpload">
+                <input type="file" id="imagem" accept="image/*">
+                <div class="placeholder" id="imgPlaceholder">
+                  <span class="icon">🖼️</span>
+                  Clique ou arraste uma imagem aqui<br>
+                  <small style="opacity:0.7">PNG, JPG, WEBP, GIF · máx. ~2MB</small>
+                </div>
+                <img id="imgPreview" class="image-preview" alt="Preview">
+              </div>
+              <input type="hidden" id="imagemBase64" name="imagem">
+            </div>
+
+            <!-- Ações -->
+            <div class="form-group full" style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem;">
+              <button type="submit" class="btn btn-primary" id="btnSalvar">
+                💾 Cadastrar Produto
+              </button>
+              <button type="reset" class="btn btn-secondary" id="btnLimpar">
+                🗑️ Limpar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Preview em tempo real -->
+      <aside class="preview-panel">
+        <h3>👁️ Preview ao vivo</h3>
+        <div class="product-card-preview" id="previewCard">
+          <div class="img-wrap" id="previewImg">
+            <span class="no-img">📦</span>
+          </div>
+          <div class="body">
+            <div class="name" id="previewNome">Nome do produto</div>
+            <div class="desc" id="previewDesc">A descrição aparecerá aqui...</div>
+            <div class="meta">
+              <span class="price" id="previewPreco">R$ 0,00</span>
+              <span class="estoque" id="previewQty">estoque: 1</span>
+            </div>
+            <div class="validity" id="previewValidade" style="display:none;"></div>
+            <div class="tags" id="previewTags"></div>
+          </div>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; text-align: center;">
+          Alterações de preço e quantidade refletem instantaneamente.
+        </p>
+      </aside>
+    </div>
+
+    <!-- Lista de produtos -->
+    <div class="card" style="margin-top: 2.5rem;">
+      <div class="card-header">
+        <h2>📦 Produtos Cadastrados</h2>
+        <button class="btn btn-secondary btn-sm" id="btnAtualizarLista">🔄 Atualizar</button>
+      </div>
+      <div id="listaProdutos">
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          <p>Nenhum produto cadastrado ainda.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script>
+    // ========== ESTADO ==========
+    const state = {
+      tags: [],
+      imagemBase64: null,
+      editandoId: null
+    };
+
+    // ========== ELEMENTOS ==========
+    const form = document.getElementById('formProduto');
+    const nomeEl = document.getElementById('nome');
+    const descEl = document.getElementById('descricao');
+    const precoEl = document.getElementById('preco');
+    const estoque = document.getElementById('quantidade');
+    const validadeEl = document.getElementById('validade');
+    const categoriaEl = document.getElementById('categoria');
+    const tagInput = document.getElementById('tagInput');
+    const tagsContainer = document.getElementById('tagsContainer');
+    const imgInput = document.getElementById('imagem');
+    const imgPreview = document.getElementById('imgPreview');
+    const imgPlaceholder = document.getElementById('imgPlaceholder');
+    const imageUpload = document.getElementById('imageUpload');
+    const listaProdutos = document.getElementById('listaProdutos');
+
+    // Preview
+    const previewNome = document.getElementById('previewNome');
+    const previewDesc = document.getElementById('previewDesc');
+    const previewPreco = document.getElementById('previewPreco');
+    const previewQty = document.getElementById('previewQty');
+    const previewValidade = document.getElementById('previewValidade');
+    const previewTags = document.getElementById('previewTags');
+    const previewImg = document.getElementById('previewImg');
+
+    // ========== TOAST ==========
+    function toast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span> <span>${msg}</span>`;
+      document.getElementById('toasts').appendChild(el);
+      setTimeout(() => {
+        el.classList.add('hiding');
+        setTimeout(() => el.remove(), 300);
+      }, 3200);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatPreco(v) {
+      return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // ========== PREVIEW EM TEMPO REAL ==========
+    function atualizarPreview() {
+      previewNome.textContent = nomeEl.value.trim() || 'Nome do produto';
+      previewDesc.textContent = descEl.value.trim() || 'A descrição aparecerá aqui...';
+      previewPreco.textContent = formatPreco(precoEl.value);
+      previewQty.textContent = 'estoque: ' + (estoque.value || 0);
+
+      if (validadeEl.value) {
+        const d = new Date(validadeEl.value + 'T00:00:00');
+        previewValidade.style.display = 'block';
+        previewValidade.textContent = '📅 Válido até ' + d.toLocaleDateString('pt-BR');
+      } else {
+        previewValidade.style.display = 'none';
+      }
+
+      previewTags.innerHTML = state.tags.map(t => `<span>${escapeHtml(t)}</span>`).join('');
+
+      if (state.imagemBase64) {
+        previewImg.innerHTML = `<img src="${state.imagemBase64}" alt="Produto">`;
+      } else {
+        previewImg.innerHTML = '<span class="no-img">📦</span>';
+      }
+    }
+
+    // Listeners de input para preview instantâneo
+    [nomeEl, descEl, precoEl, estoque, validadeEl].forEach(el => {
+      el.addEventListener('input', atualizarPreview);
+    });
+
+    // ========== QUANTIDADE +/- ==========
+    document.getElementById('qtyPlus').addEventListener('click', () => {
+      estoque.value = Number(estoque.value || 0) + 1;
+      atualizarPreview();
+    });
+    document.getElementById('qtyMinus').addEventListener('click', () => {
+      const v = Number(estoque.value || 0);
+      if (v > 0) {
+        estoque.value = v - 1;
+        atualizarPreview();
+      }
+    });
+
+    // ========== TAGS ==========
+    function renderTags() {
+      // Remove tags existentes (mantém o input)
+      tagsContainer.querySelectorAll('.tag').forEach(t => t.remove());
+      state.tags.forEach((tag, i) => {
+        const span = document.createElement('span');
+        span.className = 'tag';
+        span.innerHTML = `${escapeHtml(tag)} <button type="button" data-i="${i}" aria-label="Remover">×</button>`;
+        tagsContainer.insertBefore(span, tagInput);
+      });
+      document.getElementById('tags').value = state.tags.join(',');
+      atualizarPreview();
+    }
+
+    tagInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const val = tagInput.value.trim().replace(/,/g, '');
+        if (val && !state.tags.includes(val)) {
+          state.tags.push(val);
+          renderTags();
+        }
+        tagInput.value = '';
+      }
+      if (e.key === 'Backspace' && !tagInput.value && state.tags.length) {
+        state.tags.pop();
+        renderTags();
+      }
+    });
+
+    tagsContainer.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON' && e.target.dataset.i !== undefined) {
+        state.tags.splice(Number(e.target.dataset.i), 1);
+        renderTags();
+      }
+    });
+
+    // ========== IMAGEM ==========
+    function processarImagem(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        toast('Selecione uma imagem válida', 'error');
+        return;
+      }
+      if (file.size > 2.5 * 1024 * 1024) {
+        toast('Imagem muito grande (máx. ~2MB)', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        state.imagemBase64 = e.target.result;
+        imgPreview.src = e.target.result;
+        imgPreview.classList.add('visible');
+        imgPlaceholder.style.display = 'none';
+        atualizarPreview();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    imgInput.addEventListener('change', () => {
+      if (imgInput.files[0]) processarImagem(imgInput.files[0]);
+    });
+
+    // Drag & drop
+    ['dragenter', 'dragover'].forEach(ev => {
+      imageUpload.addEventListener(ev, (e) => {
+        e.preventDefault();
+        imageUpload.classList.add('dragover');
+      });
+    });
+    ['dragleave', 'drop'].forEach(ev => {
+      imageUpload.addEventListener(ev, (e) => {
+        e.preventDefault();
+        imageUpload.classList.remove('dragover');
+      });
+    });
+    imageUpload.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files[0];
+      if (file) processarImagem(file);
+    });
+
+    // ========== SUBMIT ==========
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSalvar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Salvando...';
+
+      const payload = {
+        nome: nomeEl.value.trim(),
+        descricao: descEl.value.trim(),
+        preco: Number(precoEl.value) || 0,
+        quantidade: Number(estoque.value) || 0,
+        validade: validadeEl.value || null,
+        categoria: categoriaEl.value || null,
+        tags: [...state.tags],
+        imagem: state.imagemBase64 || null
+      };
+
+      try {
+        let res, json;
+        if (state.editandoId) {
+          res = await fetch(`/api/produtos/${state.editandoId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          res = await fetch('/api/produtos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+        json = await res.json();
+
+        if (res.ok) {
+          toast(json.message || 'Produto salvo!');
+          limparForm();
+          carregarProdutos();
+        } else {
+          toast(json.error || 'Erro ao salvar', 'error');
+        }
+      } catch (err) {
+        toast('Falha de conexão com o servidor', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = state.editandoId ? '💾 Atualizar Produto' : '💾 Cadastrar Produto';
+      }
+    });
+
+    function limparForm() {
+      form.reset();
+      state.tags = [];
+      state.imagemBase64 = null;
+      state.editandoId = null;
+      renderTags();
+      imgPreview.classList.remove('visible');
+      imgPreview.src = '';
+      imgPlaceholder.style.display = '';
+      estoque.value = 1;
+      document.getElementById('btnSalvar').innerHTML = '💾 Cadastrar Produto';
+      atualizarPreview();
+    }
+
+    document.getElementById('btnLimpar').addEventListener('click', (e) => {
+      e.preventDefault();
+      limparForm();
+    });
+
+    // ========== LISTA DE PRODUTOS ==========
+    async function carregarProdutos() {
+      try {
+        const res = await fetch('/api/produtos');
+        const produtos = await res.json();
+
+        if (!Array.isArray(produtos) || produtos.length === 0) {
+          listaProdutos.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">📭</div>
+              <p>Nenhum produto cadastrado ainda.</p>
+            </div>`;
+          return;
+        }
+
+        // Ordena por mais recente
+        produtos.sort((a, b) => (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+
+        listaProdutos.innerHTML = `
+          <div class="products-list stagger">
+            ${produtos.map((p, i) => `
+              <div class="product-item" data-id="${p.id}" style="animation-delay: ${i * 0.04}s">
+                <div class="img-wrap">
+                  ${p.imagem
+                    ? `<img src="${p.imagem}" alt="${escapeHtml(p.nome)}">`
+                    : '<span style="font-size:2.5rem; color:var(--text-muted);">📦</span>'}
+                </div>
+                <div class="body">
+                  <div class="name" style="font-weight:700; margin-bottom:0.3rem;">${escapeHtml(p.nome)}</div>
+                  ${p.descricao ? `<div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:0.5rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHtml(p.descricao)}</div>` : ''}
+                  <div style="display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; margin-bottom:0.5rem;">
+                    <span style="font-weight:800; background:var(--gradient-accent); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-size:1.15rem;">
+                      ${formatPreco(p.preco)}
+                    </span>
+                    <span style="font-size:0.8rem; background:var(--bg-input); padding:0.15rem 0.5rem; border-radius:999px; color:var(--text-secondary);">
+                      estoque: ${p.quantidade ?? 0}
+                    </span>
+                    ${p.categoria ? `<span style="font-size:0.75rem; color:var(--text-muted);">${escapeHtml(p.categoria)}</span>` : ''}
+                  </div>
+                  ${p.validade ? `<div style="font-size:0.8rem; color:var(--warning); margin-bottom:0.4rem;">📅 ${new Date(p.validade + 'T00:00:00').toLocaleDateString('pt-BR')}</div>` : ''}
+                  ${Array.isArray(p.tags) && p.tags.length ? `
+                    <div style="display:flex; flex-wrap:wrap; gap:0.3rem; margin-bottom:0.5rem;">
+                      ${p.tags.map(t => `<span style="font-size:0.7rem; background:rgba(124,92,255,0.2); color:var(--accent-hover); padding:0.1rem 0.45rem; border-radius:999px;">${escapeHtml(t)}</span>`).join('')}
+                    </div>` : ''}
+                  <div class="actions">
+                    <button class="btn btn-secondary btn-sm btn-editar" data-id="${p.id}">✏️ Editar</button>
+                    <button class="btn btn-danger btn-sm btn-excluir" data-id="${p.id}">🗑️</button>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>`;
+
+        // Bind eventos de editar / excluir
+        listaProdutos.querySelectorAll('.btn-editar').forEach(btn => {
+          btn.addEventListener('click', () => editarProduto(btn.dataset.id, produtos));
+        });
+        listaProdutos.querySelectorAll('.btn-excluir').forEach(btn => {
+          btn.addEventListener('click', () => excluirProduto(btn.dataset.id));
+        });
+      } catch (err) {
+        listaProdutos.innerHTML = `<div class="empty-state"><p>Erro ao carregar produtos.</p></div>`;
+      }
+    }
+
+    function editarProduto(id, produtos) {
+      const p = produtos.find(x => x.id === id);
+      if (!p) return;
+
+      state.editandoId = id;
+      nomeEl.value = p.nome || '';
+      descEl.value = p.descricao || '';
+      precoEl.value = p.preco ?? 0;
+      estoque.value = p.quantidade ?? 0;
+      validadeEl.value = p.validade || '';
+      categoriaEl.value = p.categoria || '';
+      state.tags = Array.isArray(p.tags) ? [...p.tags] : [];
+      renderTags();
+
+      if (p.imagem) {
+        state.imagemBase64 = p.imagem;
+        imgPreview.src = p.imagem;
+        imgPreview.classList.add('visible');
+        imgPlaceholder.style.display = 'none';
+      } else {
+        state.imagemBase64 = null;
+        imgPreview.classList.remove('visible');
+        imgPlaceholder.style.display = '';
+      }
+
+      document.getElementById('btnSalvar').innerHTML = '💾 Atualizar Produto';
+      atualizarPreview();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      toast('Editando produto — altere e salve', 'info');
+    }
+
+    async function excluirProduto(id) {
+      if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+      try {
+        const res = await fetch(`/api/produtos/${id}`, { method: 'DELETE' });
+        const json = await res.json();
+        if (res.ok) {
+          toast(json.message || 'Produto removido');
+          if (state.editandoId === id) limparForm();
+          carregarProdutos();
+        } else {
+          toast(json.error || 'Erro ao excluir', 'error');
+        }
+      } catch {
+        toast('Falha de conexão', 'error');
+      }
+    }
+
+    document.getElementById('btnAtualizarLista').addEventListener('click', carregarProdutos);
+
+    // Init
+    atualizarPreview();
+    carregarProdutos();
+  </script>
+</body>
+</html>

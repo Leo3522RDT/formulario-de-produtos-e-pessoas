@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulário Produtos — Sistema de Cadastro</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span>📦</span> Formulário Produtos
+    </a>
+    <ul class="nav-links">
+      <li><a href="/" class="active">Início</a></li>
+      <li><a href="/cadastrar">Pessoas</a></li>
+      <li><a href="/cadastrar_produtos">Produtos</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Gerencie Pessoas e Produtos</h1>
+      <p>
+        Sistema completo de cadastro com interface moderna, edição em tempo real,
+        tags, imagens e controle de estoque.
+      </p>
+
+      <div class="hero-cards">
+        <a href="/cadastrar" class="hero-card">
+          <span class="icon">👤</span>
+          <h3>Cadastrar Pessoas</h3>
+          <p>Registre pessoas com nome, e-mail, telefone e outras informações de forma rápida e organizada.</p>
+        </a>
+
+        <a href="/cadastrar_produtos" class="hero-card">
+          <span class="icon">🛒</span>
+          <h3>Cadastrar Produtos</h3>
+          <p>Adicione produtos com imagem, descrição, tags, preço, quantidade, validade e edite tudo em tempo real.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top: 3rem; text-align: center;">
+      <h2 style="margin-bottom: 0.75rem;">✨ Recursos</h2>
+      <div class="form-grid" style="text-align: left; margin-top: 1.5rem;">
+        <div>
+          <strong style="color: var(--accent-hover);">🖼️ Imagens</strong>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.3rem;">
+            Upload local com preview instantâneo (base64).
+          </p>
+        </div>
+        <div>
+          <strong style="color: var(--accent-hover);">🏷️ Tags</strong>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.3rem;">
+            Organize produtos com tags dinâmicas e removíveis.
+          </p>
+        </div>
+        <div>
+          <strong style="color: var(--accent-hover);">⚡ Edição em tempo real</strong>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.3rem;">
+            Preço e quantidade atualizam o preview instantaneamente.
+          </p>
+        </div>
+        <div>
+          <strong style="color: var(--accent-hover);">📅 Validade</strong>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.3rem;">
+            Controle de data de validade com destaque visual.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.85rem;">
+    Formulário Produtos v1.0 · Node.js + Express
+  </footer>
+</body>
+</html>
