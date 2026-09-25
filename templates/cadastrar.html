@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastrar Pessoas — Formulário Produtos</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      <span>📦</span> Formulário Produtos
+    </a>
+    <ul class="nav-links">
+      <li><a href="/">Início</a></li>
+      <li><a href="/cadastrar" class="active">Pessoas</a></li>
+      <li><a href="/cadastrar_produtos">Produtos</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2>👤 Cadastrar Pessoa</h2>
+      </div>
+
+      <form id="formPessoa" class="form-grid">
+        <div class="form-group">
+          <label for="nome">Nome <span class="required">*</span></label>
+          <input type="text" id="nome" name="nome" class="form-control" placeholder="Nome completo" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="email@exemplo.com">
+        </div>
+
+        <div class="form-group">
+          <label for="telefone">Telefone</label>
+          <input type="tel" id="telefone" name="telefone" class="form-control" placeholder="(00) 00000-0000">
+        </div>
+
+        <div class="form-group">
+          <label for="idade">Idade</label>
+          <input type="number" id="idade" name="idade" class="form-control" min="0" max="150" placeholder="Ex: 30">
+        </div>
+
+        <div class="form-group full">
+          <label for="endereco">Endereço</label>
+          <input type="text" id="endereco" name="endereco" class="form-control" placeholder="Rua, número, bairro, cidade">
+        </div>
+
+        <div class="form-group full">
+          <label for="observacoes">Observações</label>
+          <textarea id="observacoes" name="observacoes" class="form-control" placeholder="Informações adicionais..."></textarea>
+        </div>
+
+        <div class="form-group full" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <button type="submit" class="btn btn-primary" id="btnSalvar">
+            💾 Salvar Pessoa
+          </button>
+          <button type="reset" class="btn btn-secondary">
+            🗑️ Limpar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Lista de pessoas cadastradas -->
+    <div class="card" style="margin-top: 2rem;">
+      <div class="card-header">
+        <h2>📋 Pessoas Cadastradas</h2>
+        <button class="btn btn-secondary btn-sm" id="btnAtualizar">🔄 Atualizar</button>
+      </div>
+      <div id="listaPessoas">
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          <p>Nenhuma pessoa cadastrada ainda.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-container" id="toasts"></div>
+
+  <script>
+    const form = document.getElementById('formPessoa');
+    const lista = document.getElementById('listaPessoas');
+    const btnAtualizar = document.getElementById('btnAtualizar');
+
+    function toast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${msg}</span>`;
+      document.getElementById('toasts').appendChild(el);
+      setTimeout(() => {
+        el.classList.add('hiding');
+        setTimeout(() => el.remove(), 300);
+      }, 3200);
+    }
+
+    async function carregarPessoas() {
+      try {
+        const res = await fetch('/registros');
+        const dados = await res.json();
+
+        if (!Array.isArray(dados) || dados.length === 0) {
+          lista.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">📭</div>
+              <p>Nenhuma pessoa cadastrada ainda.</p>
+            </div>`;
+          return;
+        }
+
+        lista.innerHTML = `
+          <div class="products-list stagger">
+            ${dados.map((p, i) => `
+              <div class="product-item" style="animation-delay: ${i * 0.05}s">
+                <div class="body">
+                  <div class="name" style="font-weight:700; font-size:1.1rem; margin-bottom:0.4rem;">
+                    ${escapeHtml(p.nome || 'Sem nome')}
+                  </div>
+                  ${p.email ? `<div style="font-size:0.9rem; color:var(--text-secondary);">📧 ${escapeHtml(p.email)}</div>` : ''}
+                  ${p.telefone ? `<div style="font-size:0.9rem; color:var(--text-secondary);">📱 ${escapeHtml(p.telefone)}</div>` : ''}
+                  ${p.idade ? `<div style="font-size:0.85rem; color:var(--text-muted); margin-top:0.3rem;">Idade: ${p.idade}</div>` : ''}
+                  ${p.endereco ? `<div style="font-size:0.85rem; color:var(--text-muted); margin-top:0.2rem;">📍 ${escapeHtml(p.endereco)}</div>` : ''}
+                  ${p.observacoes ? `<div style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.5rem; font-style:italic;">${escapeHtml(p.observacoes)}</div>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>`;
+      } catch (err) {
+        lista.innerHTML = `<div class="empty-state"><p>Erro ao carregar dados.</p></div>`;
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSalvar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Salvando...';
+
+      const data = Object.fromEntries(new FormData(form));
+
+      try {
+        const res = await fetch('/cadastrar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const json = await res.json();
+
+        if (res.ok) {
+          toast(json.message || 'Pessoa cadastrada!');
+          form.reset();
+          carregarPessoas();
+        } else {
+          toast(json.error || 'Erro ao salvar', 'error');
+        }
+      } catch (err) {
+        toast('Falha de conexão', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '💾 Salvar Pessoa';
+      }
+    });
+
+    btnAtualizar.addEventListener('click', carregarPessoas);
+    carregarPessoas();
+  </script>
+</body>
+</html>
